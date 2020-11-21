@@ -477,6 +477,19 @@ Called when `zetteldeft-link-indicator' or
 
 Note that highlighting is not working in org comments.
 
+**** =zetteldeft-completing-read= to set a custom completing read function
+
+A function used for some autocompletion.  It must be a function that
+is compatible with =completing-read=, for example =ivy-read=.
+
+#+BEGIN_SRC emacs-lisp
+(defcustom zetteldeft-completing-read 'completing-read
+  "Function to use for completing reads; defaults to `completing-read'.
+Functions used here must be compatible with `completing-read'."
+  :type 'function
+  :group 'zetteldeft)
+#+END_SRC
+
 **** =zetteldeft-id-format= for generating time-based ID strings
 
 Format used to generate time-based IDs.
@@ -725,7 +738,7 @@ Based on =deft-find-file=.
 (defun zetteldeft-find-file (file)
   "Open deft file FILE."
   (interactive
-    (list (completing-read "Deft find file: "
+    (list (zetteldeft-completing-read "Deft find file: "
             (deft-find-all-files-no-prefix))))
   (deft-find-file file))
 #+END_SRC
@@ -768,7 +781,7 @@ Based on =deft-find-file=.
 (defun zetteldeft-find-file-id-insert (file)
   "Find deft file FILE and insert a link."
   (interactive (list
-    (completing-read "File to insert id from: "
+    (zetteldeft-completing-read "File to insert id from: "
       (deft-find-all-files-no-prefix))))
   (insert (concat zetteldeft-link-indicator
                   (zetteldeft--lift-id file)
@@ -798,7 +811,7 @@ Include the prefix on a new line after the title, and add ID and title.
 Finds the title line, and adds `backlink-prefix' with
 ID and title on a new line."
   (interactive (list
-    (completing-read "File to add backlink to: "
+    (zetteldeft-completing-read "File to add backlink to: "
       (deft-find-all-files-no-prefix))))
   (save-excursion
     (goto-char (point-min))
@@ -831,7 +844,7 @@ Based on =deft-find-file=.
 (defun zetteldeft-find-file-full-title-insert (file)
   "Find deft file FILE and insert a link with title."
   (interactive (list
-    (completing-read "File to insert full title from: "
+    (zetteldeft-completing-read "File to insert full title from: "
       (deft-find-all-files-no-prefix))))
   (insert zetteldeft-link-indicator
           (zetteldeft--lift-id file)
@@ -2038,7 +2051,7 @@ When called interactively, select a file from the completion interface.
 (defun zetteldeft-org-graph-note (deftFile)
   "Create a graph starting from note DEFTFILE."
   (interactive (list
-    (completing-read "Note to start graph from: "
+    (zetteldeft-completing-read "Note to start graph from: "
       (deft-find-all-files))))
   (setq zetteldeft--graph-links (list))
   (insert zetteldeft-graph-syntax-begin)
