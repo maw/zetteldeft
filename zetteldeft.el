@@ -232,11 +232,17 @@ This is done with the regular expression stored in
     (when (re-search-forward zetteldeft-id-regex nil t -1)
       (match-string 0))))
 
+(defcustom zetteldeft-completing-read 'completing-read
+  "Function to use for completing reads; defaults to `completing-read'.
+Replacement functions must be compatible."
+  :type 'function
+  :group 'zetteldeft)
+
 ;;;###autoload
 (defun zetteldeft-find-file (file)
   "Open deft file FILE."
   (interactive
-    (list (completing-read "Deft find file: "
+    (list (zetteldeft-completing-read "Deft find file: "
             (deft-find-all-files-no-prefix))))
   (deft-find-file file))
 
@@ -256,7 +262,7 @@ Set `zetteldeft-home-id' to an ID string of your home note."
 (defun zetteldeft-find-file-id-insert (file)
   "Find deft file FILE and insert a link."
   (interactive (list
-    (completing-read "File to insert id from: "
+    (zetteldeft-completing-read "File to insert id from: "
       (deft-find-all-files-no-prefix))))
   (insert (concat zetteldeft-link-indicator
                   (zetteldeft--lift-id file)
@@ -274,7 +280,7 @@ Formatted as `org-mode' comment by default."
 Finds the title line, and adds `backlink-prefix' with
 ID and title on a new line."
   (interactive (list
-    (completing-read "File to add backlink to: "
+    (zetteldeft-completing-read "File to add backlink to: "
       (deft-find-all-files-no-prefix))))
   (save-excursion
     (goto-char (point-min))
@@ -295,7 +301,7 @@ ID and title on a new line."
 (defun zetteldeft-find-file-full-title-insert (file)
   "Find deft file FILE and insert a link with title."
   (interactive (list
-    (completing-read "File to insert full title from: "
+    (zetteldeft-completing-read "File to insert full title from: "
       (deft-find-all-files-no-prefix))))
   (insert zetteldeft-link-indicator
           (zetteldeft--lift-id file)
@@ -843,7 +849,7 @@ STR should be the search the resulting notes of which should be included in the 
 (defun zetteldeft-org-graph-note (deftFile)
   "Create a graph starting from note DEFTFILE."
   (interactive (list
-    (completing-read "Note to start graph from: "
+    (zetteldeft-completing-read "Note to start graph from: "
       (deft-find-all-files))))
   (setq zetteldeft--graph-links (list))
   (insert zetteldeft-graph-syntax-begin)
