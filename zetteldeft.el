@@ -46,6 +46,8 @@
 
 (require 'ace-window)
 
+(require 'seq)
+
 (declare-function avy-jump "avy")
 (unless (fboundp 'avy-jump)
   (display-warning 'zetteldeft
@@ -126,6 +128,16 @@ Open if there is only one result (in another window if OTHERWINDOW is non-nil)."
     (deft-filter srch t)
     deft-current-files))
 
+;;;###autoload
+(defun zetteldeft-search-notes-tagged-with (&optional str)
+  (interactive)
+  (let* ((tags (seq-sort 'string-lessp
+                         (seq-filter 'stringp
+                                     (zetteldeft--get-all-tags))))
+         (search-term (or str
+                          (zetteldeft-completing-read "Tag to search for: " tags))))
+    (zetteldeft--search-global search-term t)))
+
 (defun zetteldeft--id-font-lock-setup (var val)
   "Add font-lock highlighting for zetteldeft links.
 Called when `zetteldeft-link-indicator' or
@@ -147,6 +159,12 @@ Called when `zetteldeft-link-indicator' or
                     zetteldeft-id-regex
                     zetteldeft-link-suffix)
            . font-lock-warning-face)))))
+
+(defcustom zetteldeft-completing-read 'completing-read
+  "Function to use for completing reads; defaults to `completing-read'.
+Functions used here must be compatible with `completing-read'."
+  :type 'function
+  :group 'zetteldeft)
 
 (defcustom zetteldeft-id-format "%Y-%m-%d-%H%M"
   "Format used when generating time-based zetteldeft IDs.
@@ -231,12 +249,6 @@ This is done with the regular expression stored in
     (insert str)
     (when (re-search-forward zetteldeft-id-regex nil t -1)
       (match-string 0))))
-
-(defcustom zetteldeft-completing-read 'completing-read
-  "Function to use for completing reads; defaults to `completing-read'.
-Replacement functions must be compatible."
-  :type 'function
-  :group 'zetteldeft)
 
 ;;;###autoload
 (defun zetteldeft-find-file (file)
