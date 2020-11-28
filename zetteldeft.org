@@ -16,6 +16,7 @@ Check out the Github [[https://github.com/EFLS/zetteldeft][repository]] to get t
 Read on for an introduction and some documentation.
 
 Latest additions:
+ - *26 Nov*: Add =zetteldeft-search-tag=, thanks to maw.
  - *07 Oct*: Add =zetteldeft-dead-links-buffer= to show dead links.
  - *06 Oct*: Add export functionality.
  - *20 Sep*: Add =zetteldeft-go-home=.
@@ -418,7 +419,7 @@ The code searches for the given string and returns =deft-current-files=.
     deft-current-files))
 #+END_SRC
 
-**** =zetteldeft-search-notes-tagged-with= finds notes with the chosen tag
+**** =zetteldeft-search-tag= finds notes with selected tag
 
 This function allows the user to quickly search for a specific tag.
 It prompts the user for a tag via completion and launches a search.
@@ -427,15 +428,17 @@ This relies on =zetteldeft--get-all-tags=, which is also used to generate the ta
 
 #+BEGIN_SRC emacs-lisp
 ;;;###autoload
-(defun zetteldeft-search-notes-tagged-with (&optional str)
+(defun zetteldeft-search-tag ()
+  "Prompt interactively for Zetteldeft tag and launch Deft search"
   (interactive)
   (let* ((tags (seq-sort 'string-lessp
                          (seq-filter 'stringp
                                      (zetteldeft--get-all-tags))))
-         (search-term (or str
-                          (zetteldeft-completing-read "Tag to search for: " tags))))
+         (search-term (completing-read "Tag to search for: " tags)))
     (zetteldeft--search-global search-term t)))
 #+END_SRC
+
+As =zetteldeft--get-all-tags= parses the full set of files, this function might lag slightly on very big sets of notes.
 
 *** IDs, links and tags
 **** A note on nomenclature, IDs and links
@@ -920,7 +923,8 @@ A file title will be inserted in the newly created file wrapped in
 (without extension) is added to the kill ring. When `evil' is loaded,
 change to insert state."
   (interactive (list (read-string "Note title: ")))
-  (let* ((zdId (or id
+  (let* ((deft-use-filename-as-title t)
+         (zdId (or id
                    (zetteldeft-generate-id str)))
          (zdName (concat zdId zetteldeft-id-filename-separator str)))
   (deft-new-file-named zdName)
@@ -929,6 +933,8 @@ change to insert state."
   (save-buffer)
   (when (featurep 'evil) (evil-insert-state))))
 #+END_SRC
+
+To bypass =deft-auto-populate-title-maybe= and prevent having two lines with title matter, we need make sure =deft-use-filename-as-title= is set to t.
 
 Note that the file is only actually created when =save-buffer= is called.
 
@@ -2212,6 +2218,7 @@ Other setups, for =evil= or =spacemacs=, are suggested in section [[#suggested-k
   (global-set-key (kbd "C-c d l") 'zetteldeft-avy-link-search)
   (global-set-key (kbd "C-c d t") 'zetteldeft-avy-tag-search)
   (global-set-key (kbd "C-c d T") 'zetteldeft-tag-buffer)
+  (global-set-key (kbd "C-c d /") 'zetteldeft-search-tag)
   (global-set-key (kbd "C-c d i") 'zetteldeft-find-file-id-insert)
   (global-set-key (kbd "C-c d I") 'zetteldeft-find-file-full-title-insert)
   (global-set-key (kbd "C-c d o") 'zetteldeft-find-file)
@@ -2273,6 +2280,7 @@ Calling =zetteldeft-set-classic-keybindings= will set the following (see [[#kb-d
 | =C-c d l=     | =zetteldeft-avy-link-search=             |
 | =C-c d t=     | =zetteldeft-avy-tag-search=              |
 | =C-c d T=     | =zetteldeft-tag-buffer=                  |
+| =C-c d /=     | =zetteldeft-search-tag=                  |
 | =C-c d i=     | =zetteldeft-find-file-id-insert=         |
 | =C-c d I=     | =zetteldeft-find-file-full-title-insert= |
 | =C-c d o=     | =zetteldeft-find-file=                   |
@@ -2309,6 +2317,7 @@ It relies on =general.el= for modal editing with =evil= and configures =deft= an
   "dl" '(zetteldeft-avy-link-search :wk "avy link search")
   "dt" '(zetteldeft-avy-tag-search :wk "avy tag search")
   "dT" '(zetteldeft-tag-buffer :wk "tag list")
+  "d/" '(zetteldeft-search-tag :wk "search tag")
   "di" '(zetteldeft-find-file-id-insert :wk "insert id")
   "dI" '(zetteldeft-find-file-full-title-insert :wk "insert full title")
   "do" '(zetteldeft-find-file :wk "find file")

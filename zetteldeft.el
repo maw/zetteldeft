@@ -129,13 +129,13 @@ Open if there is only one result (in another window if OTHERWINDOW is non-nil)."
     deft-current-files))
 
 ;;;###autoload
-(defun zetteldeft-search-notes-tagged-with (&optional str)
+(defun zetteldeft-search-tag ()
+  "Prompt interactively for Zetteldeft tag and launch Deft search"
   (interactive)
   (let* ((tags (seq-sort 'string-lessp
                          (seq-filter 'stringp
                                      (zetteldeft--get-all-tags))))
-         (search-term (or str
-                          (zetteldeft-completing-read "Tag to search for: " tags))))
+         (search-term (completing-read "Tag to search for: " tags)))
     (zetteldeft--search-global search-term t)))
 
 (defun zetteldeft--id-font-lock-setup (var val)
@@ -339,7 +339,8 @@ A file title will be inserted in the newly created file wrapped in
 (without extension) is added to the kill ring. When `evil' is loaded,
 change to insert state."
   (interactive (list (read-string "Note title: ")))
-  (let* ((zdId (or id
+  (let* ((deft-use-filename-as-title t)
+         (zdId (or id
                    (zetteldeft-generate-id str)))
          (zdName (concat zdId zetteldeft-id-filename-separator str)))
   (deft-new-file-named zdName)
@@ -940,6 +941,7 @@ Does this for all links stored in `zetteldeft--graph-links'."
   (global-set-key (kbd "C-c d l") 'zetteldeft-avy-link-search)
   (global-set-key (kbd "C-c d t") 'zetteldeft-avy-tag-search)
   (global-set-key (kbd "C-c d T") 'zetteldeft-tag-buffer)
+  (global-set-key (kbd "C-c d /") 'zetteldeft-search-tag)
   (global-set-key (kbd "C-c d i") 'zetteldeft-find-file-id-insert)
   (global-set-key (kbd "C-c d I") 'zetteldeft-find-file-full-title-insert)
   (global-set-key (kbd "C-c d o") 'zetteldeft-find-file)
